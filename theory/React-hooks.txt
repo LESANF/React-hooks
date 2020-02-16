@@ -1,0 +1,159 @@
+1. < useState >
+
+useState를 써야하니 import해주자 import React {useState} from "react"
+
+useState는 항상 2개의 value를 return함.
+
+첫번째 value는 item이라고 이름을 주고, 두번째 value는 값을 변경하게 함. 
+
+const [nickName, setNickName] = useState("");
+
+이런식으로 선언할 수 있음. useState의 인자로 들어가는것은 State의 초기값임. ""는 공백을 의미 아무내용없음.
+
+const [num, setNum] = useState(0);
+
+숫자도 가능함. 초기값은 0으로 설정함.
+
+컴포넌트의 return값으로 <h1>카운트 : {num}</h1>를준다. 그럼 초기설정한 0이 secreen에 표시된다.
+
+setNum으로 값을 변경시킴. setNum() 안에 num을 넣어 변경식을 정해줌 setNum(num+1) 이런식으로.
+
+숫자가아닌 텍스트도 가능함. 
+
+const nameChange = e => {
+    setName(e.target.value);
+};
+
+setName으로 e.target.value를 넣어줌. nameChange함수는 이벤트 파라매터를 받아 사용함.
+
+<input value={name} onChange={nameChange} /> onChange로 함수로 연결시켜줌. 내부의 함수가아니기 때문에 this를 안썻음.
+
+클래스형은 함수를 넣어줄 때, this.함수명으로 넣음.
+
+<button onClick={add}>+</button> 숫자형도 onClick으로 함수로 연결해줌. 이렇게 useState를 사용함.
+
+=============================================================================
+
+1-1. < useInput >
+
+useInput은 기본적으로 input을 업데이트함.
+
+useInput 함수를 선언하자. 
+
+useInput은 인자로 initValue를 받을거고 const [value, setValue] = useState(initValue); useState선언.
+
+const App에는 input을 하나 만들어주자.
+
+그리고 안에 선언해줌.   const name = useInput("Mr."); 이건 Mr.를 내이름의 기본값으로 설정한거임.
+-> name으로 정의하고 거기엔 useInput에 Mr.라는 String형 인자를 주고 이건 함수로 들어가 initValue가됨.
+
+useInput함수에서 reutrn되는 값이 const로 선언한 name에 들어감.
+
+그리고 useInput함수는 return으로 {value}를 반환함. 
+
+지금 name은 return 받은 value를 가지고있음. input에 value를 줘보자. value={name.value}
+-> input에 Mr.이 기본으로 들어가있음.
+
+여기서 return할 때, return value해버리면 name.value가 먹히지않음. value={name}으로해야함.
+
+{}는 객체라고 이해하면 될것같다. const name = {value}가 될것이고. 이경우 name.value가 되야함.
+
+그냥 return value면 const name = value 이기 때문에 name.value가 먹히지않음. 내생각임.
+
+또는 그냥 {...name}으로 써도 가능함. 이건 name안에 있는 모든 것들을 풀어준다는 뜻임.
+
+그리고 useInput안에도 함수를하나 더 만들어보자 const onChange = e => {} 이것또한 return 해줌 { value, onChange }
+
+name은 { value, onChange }를 가지고있고 이것은 name.value, name.onChange로 사용할 수 있음.
+
+줄여서 {...name}으로 사용한다. onChange 함수로인해 event.target.value를 얻을수있고 setValue에 넣어사용하면됨.
+
+다음은 유효성검사를 넣어줄거임.
+
+const useInput = (initValue, validator) => {
+  const [value, setValue] = useState(initValue);
+  const onChange = e => {
+    const {
+      target: { value }
+    } = e;
+    let willUpdate = true;
+    if (typeof validator === "function") {
+      willUpdate = validator(value);
+    }
+    if (willUpdate) {
+      setValue(value);
+    }
+  };
+  return { value, onChange };
+};
+
+function App() {
+  const maxLen = value => value.length < 10;
+  const name = useInput("Mr.", maxLen);
+
+maxLen함수에서 조건으로 input에들어가는 value가 10자리 미만으로만 입력되게 조건을 건거임.
+
+useInput에서 2개를 인자로받음. if문을 이용해 조건을 주고 validator(value)로 인해 값이 바뀔때마다 검사를함. 
+
+10자리부터 false를 반환하기 때문에 더이상 setValue로 값이 바뀌지않음. 즉 길이가 10자리 미만만 입력됨.
+
+=============================================================================
+
+1-3. < useTabs >
+
+API나 다른 어떤것으로부터 무언가를 가져온다고 가정하자.
+
+그건 선언한 content에 배열형 객체로 들어갈거임. 우리의경우 연습이기 때문에 직접 넣어줄거임.
+
+const content = [
+  {
+    tab: "section 1",
+    content: "I'm the content of the Section 1"
+  },
+  {
+    tab: "section 2",
+    content: "I'm the content of the Section 2"
+  }
+];
+
+const useTabs = (initialTab, allTabs) => {
+  if (!allTabs || !Array.isArray(allTabs)) {
+    return;
+  }
+ 
+  const [currentIndex, setcurrentIndex] = useState(initialTab);
+ 
+  return {
+    currentItem: allTabs[currentIndex],
+    changeItem: setcurrentIndex
+  };
+};
+
+function App() {
+  const { currentItem, changeItem } = useTabs(0, content);
+
+  return (
+    <div>
+      {content.map((potato, index) => (
+        <button onClick={() => changeItem(index)}>{potato.tab}</button>
+      ))}
+      <div>{currentItem.content}</div>
+    </div>
+  );
+}
+
+이코드의 작동원리는 버튼을 누르면 해당버튼이 가지고있는 내용을 screen에 출력해주는거임.
+
+일단 content를 map으로 지정하여 potato, index 인자를줌. index는 여기서 0, 1을 반환함 그리고 potato.tab은 section1,2를 버튼에남김.
+
+useTabs함수에서 initialTab, allTabs를 인자로받고 이것은 0, content로 들어가게됨.
+
+return으로 changeItem : setcurrentIndex로 줬으므로 changeItem(index)를 통해 onChange가 발생했을때 index값을 넘겨줄 수 있음.
+
+값이 넘어가면  setcurrentIndex의 값이 바꼈으므로 state값이 바뀔거고, currentItem : allTabs[currentIndex]의 currentIndex또한 바뀔것이다.
+
+=============================================================================
+
+2. < useEffect >
+
+
