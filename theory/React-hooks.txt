@@ -294,5 +294,61 @@ useClick은 useRef()를 return해줌. const title은 h1태그에서 ref={title}�
 const title = h1임.
 
 
+const sayHello = () => {console.log("hello"); }; 해당 함수를 선언하고 title의 useClick함수에 인자로 넣어주자.
+
+이건 useClick함수에서 onClick으로 인식됨.
+
+useEffect함수를 써서 element.current가 있으면 element.current에 addEventListener를 달아줌. element.current는 현재 h1태그임.
+
+ref와 title함수와 useClick이 상호작용을 하는거임.
+
+title은 ref로 h1태그를 담고있고 그 title은 useClick 함수의 return값을 받음. 그 return 값은 내부에서 정해준 element임.
+
+element를 통해 ref로 상호작용이 가능해짐.
+
+componentWillUnmount될 때, useEffect에서 부여한 addEventListener를 지워줘야함.
+
+useEffect는 componentDidmount 상태에 동작함. 우리의 경우엔 addEvent해준거.
+
+sayhello를 가진 useClick이 mount 되었을 때, click 이벤트를 추가해주고
+
+두번째로 받는 dependency. 즉 첫번째 인자(함수)에 대한 업데이트가 발생했을때. 아무것도 하지않아도 되기때문에 빈배열을 반환 [].
+
+그리고 useEffect는 mount, willUpdate와 그리고 또 willUnmount 때 발생하는데.
+
+return () => {
+      if (element.current) {
+        element.current.removeEventListener("click", onClick); 
+	}
+};
+
+이부분이 willUnmount때 발생할거임. 
+
+다시 정리해서 보면, useEffect에 첫번째인자(함수)를 넣으면, Didmount와 Didupdate때 호출 될거고 ( dependency가 [], 존재하지 않는 한 )
+
+만약 dependency가 존재하면 
+
+if (element.current) {
+      element.current.addEventListener("click", onClick);
+    }
+
+이부분은 DidMount일 때만 호출된다.
+
+그리고 return을 할 때 함수를 return 한다면 Unmount가 발생한다.
+
+component가 mount 되었을 때, 이벤트리스너를 달아줄거고, dependency가 없기 때문에 영원하다.
+
+dependency를 넣지않고 [], 아예 없애버린다면( 빈배열을 아예적지않는다는 뜻 )
+
+매번 update 될때마다 eventListener가 추가됨.
+
+dependency로 []를 넣어주는 의미는 DidMount때 단 한번만 실행되라는 의미임.
+
+그리고 function을 return하는데 이건 willUnmount에서 발생. 이렇게 하는이유는 컴포넌트가 mount되지 않았을때
+
+eventListener가 배치되게 하고 싶지 않기 때문.
+
+=============================================================================
+
 
 
