@@ -156,4 +156,143 @@ return으로 changeItem : setcurrentIndex로 줬으므로 changeItem(index)를 �
 
 2. < useEffect >
 
+useState처럼 useEffect도 import {useEffect} from "react"를 해줘야함.
+
+useEffect는 componentWillUnmount와 componentDidMount, componentWillUpdate와 비슷함.
+
+useEffect는 2개의 인자를 받는다. 
+
+첫번째는 function으로써의 effect, 두번째는 배열안에 든값에 대하여 변화가 일어나면 useEffect가 실행됨.
+
+function App() {
+  const [number, setNumber] = useState(0);
+  const [anumber, setAnumber] = useState(0);
+
+  const hello = () => console.log("hi i am effect");
+
+  useEffect(hello, [number]);
+
+  return (
+    <div>
+      <div>HI</div>
+      <button onClick={() => setNumber(number + 1)}>{number}</button>
+      <button onClick={() => setAnumber(anumber + 1)}>{anumber}</button>
+    </div>
+  );
+}
+
+다음과 같은 코드는 버튼을 누르면 number와 anumber를 1씩 증가시켜주는 식임.
+
+useEffect에는 hello함수를 전해줬고. useEffect는 mount될때 hello함수를 출력하고
+
+[] 배열에 number가 있으니 number버튼을 누르면 또 hello를 실행시킨것이다. 어떤 경우도 실행시키고 싶지 않다면 [] 빈배열을 주면됨.
+
+mount일때는 무조건 실행
+
+=============================================================================
+
+2-1. < useTitle >
+
+useTitle은 useEffect를 사용한거임.
+
+const useTitle = init => {
+  const [title, setTitle] = useState(init);
+
+  const updateTitle = () => {
+    const htmlTitle = document.querySelector("title");
+    htmlTitle.innerText = title;
+  };
+
+  useEffect(updateTitle, [title]);
+
+  return setTitle;
+};
+
+function App() {
+  const titleUpdater = useTitle("Loading...");
+}
+
+다음코드를 보자. 일단 document.querySelector("title")은 haed에 있는 title을 가져오는거임 브라우저의 이름으로 표시되는 것.
+
+시작은 titleUpdater부터 시작함. 이건 useTitle에 인자로 "Loading..." 라는 스트링을 보냄.
+
+useTitle로 들어가서 해당 "Loading..."인자는 init이 되고. useState에의해 초기 title값이 "Loading..."가됨.
+
+useState에 의해 title값이 바꼇으니, 그 값은 updateTitle 함수로 들어가게되고 쿼리셀렉터로 따온 title 태그에 
+
+가져온 title값을 넣게됨. updateTitle이 실행이되는 계기는 useEffect(updateTitle, [title]); 때문임.
+
+useEffect는 컴포넌트가 mount될 때, updateTitle함수를 부를거고, title이 업데이트되면 updateTitle을 다시 부름.
+
+updateTitle은 return setTitle을 해줌. setTitle은 title값을 변경하기위해 return 해주는거임.
+
+*** titleUpdater는 setTitle과 동일함.
+
+=============================================================================
+
+2.2 < useClick >
+
+useClick을 사용하기 앞서, reference를 해볼거임 ref.
+
+ref는 기본적으로 우리의 컴포넌트의 어떤 부분을 선택하는 방법임. document.getElementByID()처럼.
+
+react에 있는 모든 컴포넌트는 reference element를 가지고있음. 
+
+function App() {
+  const input = useRef();
+
+  setTimeout(() => console.log(input), 2000);
+
+  return (
+    <div>
+      <input ref={input} placeholder="test" />
+    </div>
+  );
+}
+
+이렇게 input tag의 ref로 const input을 넣어주고 . 2초후 console.log(input)을 해보자.
+
+Object {current: HTMLInputElement}
+current: 
+<input placeholder="test"></input>
+
+객체로 보여주고 그안에 current값에 우리가 쓴 iuput이 있음.
+
+조금더 명확하게 하기위해 console.log(input.current)로함.
+
+setTimeout(() => input.current.focus(), 2000); 이런식으로 2초후 input이 focus되게 할 수도 있음.
+
+이제 useClick을 해보자.
+
+const useClick = onClick => {
+  const element = useRef();
+
+  useEffect(() => {
+    if (element.current) {
+      element.current.addEventListener("click", onClick);
+    }
+  });
+
+  return element;
+};
+
+function App() {
+  const title = useClick();
+
+  return (
+    <div>
+      <h1 ref={title}>Hi</h1>
+      <input placeholder="test" />
+    </div>
+  );
+}
+
+useClick() 함수를 담은 title이 존재함. 
+
+useClick은 useRef()를 return해줌. const title은 h1태그에서 ref={title}하여 상호작용할 수 있음.
+
+const title = h1임.
+
+
+
 
