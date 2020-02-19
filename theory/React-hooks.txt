@@ -352,5 +352,102 @@ eventListener가 배치되게 하고 싶지 않기 때문.
 
 2.3 < useConfirm & usePreventLeave >
 
+useConfirm. confirm함수를 쓰는것. 
+
+이건 useState나 useEffect를 쓰지않는 hook임.
+
+confirm(String) 은 alert처럼 알림창이 나오면서 String문구를 표시해줌.
+
+const useConfirmer = (text, callback) => {
+  if (typeof callback !== "function") {
+    return;
+  }
+  const ConfirmFun = () => {
+    if (confirm(text)) {
+      callback();
+    }
+  };
+
+  return ConfirmFun;
+};
+
+function App() {
+  const res = () => console.log("Success !");
+  const test = useConfirmer("really?", res);
+
+  return (
+    <div>
+      <button onClick={test}>push</button>
+    </div>
+  );
+}
+
+useConfirmer는 인자로 text스트링과 callback 함수를 받음.
+
+callback이 함수형이 아니면 내용없이 return을 보내고 끝냄.
+
+해당 조건문을 통과하면 confirmFun 함수로 들어감.
+
+confirm(text)를 지나면 callback함수를 실행. 
+
+confirmFun 함수를 return함.
+
+App내부에선 callback이름으로 들어갈 인자인 함수 res. 
+
+그리고 test에 useConfimer함수의 return값을 저장함.
+
+test는 confirmFun과 같음.
+
+button의 onClick={test}로 지정해주면서 누를때 test가 실행됨.
+
+취소했을때도 지정해줄 수 있음.
+
+const resCancel = () => console.log("Cancel !"); 함수를 useConfimer에 인자로줌.
+
+그리고 if(confirm(text))일때 알림창이뜨고 yes를하면 callback()을실행. no를 누르면 else로 들어가므로 else로 resCancel()을 실행시켜주면됨.
+
+이런 코드가 함수형 프로그래밍임. 
+
+어떤 어려운 클릭의 결과라도 사용자를 보호할 수 있음.
+
+-------------------------------------------------------------------------
+
+usePreventLeave 
+
+이건 내가 웹 사이트 창을닫을때, 아직 저장하지 않았다 ! 라고 알림창을 띄우는 경우.
+
+윈도우창을 닫을때 이사이트에서 나가겠습니까 ? 이런식의 알림창을 띄우기위해 사용되는 것은 addEventListener("beforeunload",function()) 임.
+
+그리고 event.returnValue = "" 을 꼭넣어줘야함.
 
 
+const usePreventLeave = () => {
+  const listener = e => {
+    e.preventDefault();
+    e.returnValue = "";
+  };
+
+  const formProtect = () => window.addEventListener("beforeunload", listener);
+  const formUprotect = () =>
+    window.removeEventListener("beforeunload", listener);
+
+  return { formProtect, formUnprotect };
+};
+
+function App() {
+  const { formProtect, formUnprotect } = usePreventLeave();
+  return (
+    <div>
+      <button onClick={formProtect}>Protect</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <button onClick={formUnprotect}>Unprotect</button>&nbsp;&nbsp;&nbsp;&nbsp;
+    </div>
+  );
+}
+
+두개의 버튼을 눌렀음. 나갈때 물어보는 경우를 protect. 그리고 그 event를 지우는 Unprotect버튼.
+
+usePreventLeave()함수를통해 formprotect, formUprotect를 return받음.
+
+protect버튼을 누르고  사이트를 나가면 알림창이 뜸. 취소하고 계속 시도해도 알림창이 뜸.
+
+Unprotect버튼을 누르면 해당 이벤트가 사라지기 때문에 사이트를 나가려고 하면 바로나가짐.
