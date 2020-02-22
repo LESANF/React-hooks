@@ -350,7 +350,7 @@ eventListener가 배치되게 하고 싶지 않기 때문.
 
 =============================================================================
 
-2.3 < useConfirm & usePreventLeave >
+2.3-1 < useConfirm & usePreventLeave >
 
 useConfirm. confirm함수를 쓰는것. 
 
@@ -412,7 +412,7 @@ const resCancel = () => console.log("Cancel !"); 함수를 useConfimer에 인자
 
 -------------------------------------------------------------------------
 
-usePreventLeave 
+2.3-2 usePreventLeave 
 
 이건 내가 웹 사이트 창을닫을때, 아직 저장하지 않았다 ! 라고 알림창을 띄우는 경우.
 
