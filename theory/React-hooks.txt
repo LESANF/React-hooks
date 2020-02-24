@@ -451,3 +451,47 @@ usePreventLeave()함수를통해 formprotect, formUprotect를 return받음.
 protect버튼을 누르고  사이트를 나가면 알림창이 뜸. 취소하고 계속 시도해도 알림창이 뜸.
 
 Unprotect버튼을 누르면 해당 이벤트가 사라지기 때문에 사이트를 나가려고 하면 바로나가짐.
+
+=============================================================================
+
+2.4 < useBeforeLeave >
+
+마우스가 페이지를 벗어날때 함수를 실행시키는것.
+
+const useBeforeLeave = onBefore => {
+  if (typeof onBefore !== "function") {
+    return;
+  }
+
+  const handle = event => {
+    const { clientY } = event;
+
+    if (clientY <= 0) {
+      onBefore();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mouseleave", handle);
+    return () => document.removeEventListener("mouseleave", handle);
+  }, []);
+};
+
+function App() {
+  const begForLife = () => console.log("dont leave");
+  useBeforeLeave(begForLife);
+  return <h1>1</h1>;
+}
+
+useBeforeLeave는 벗어나는게 없으니 App내부에서 선언할때 그냥 함수를 선언하고 안에 인자로 begForLife만 넣어주면됨.
+
+clientY는 내가 마우스를 위로 했을때 받는 좌표고 해당코드는 마우스가 위로벗어날 때만 onBefore을 실행시키도록 하는거임.
+
+componentWillUnMount때는 이벤트를 지우게 했고(return 으로 함수를보내는것)
+
+그리고 계속해서 이벤트가 document에 추가되는걸 막아주기위해 useEffect의 두번째 인자로 [] 빈배열을줌. 이 뜻은 오로지 한번만 실행한다는뜻.
+
+=============================================================================
+
+2.5-1 < useFadeIn >
+
