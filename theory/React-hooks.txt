@@ -350,7 +350,7 @@ eventListener가 배치되게 하고 싶지 않기 때문.
 
 =============================================================================
 
-2.3-1 < useConfirm & usePreventLeave >
+2.3 < useConfirm & usePreventLeave >
 
 useConfirm. confirm함수를 쓰는것. 
 
@@ -412,7 +412,7 @@ const resCancel = () => console.log("Cancel !"); 함수를 useConfimer에 인자
 
 -------------------------------------------------------------------------
 
-2.3-2 usePreventLeave 
+usePreventLeave 
 
 이건 내가 웹 사이트 창을닫을때, 아직 저장하지 않았다 ! 라고 알림창을 띄우는 경우.
 
@@ -452,7 +452,6 @@ protect버튼을 누르고  사이트를 나가면 알림창이 뜸. 취소하�
 
 Unprotect버튼을 누르면 해당 이벤트가 사라지기 때문에 사이트를 나가려고 하면 바로나가짐.
 
-<<<<<<< HEAD
 =============================================================================
 
 2.4 < useBeforeLeave >
@@ -496,6 +495,105 @@ componentWillUnMount때는 이벤트를 지우게 했고(return 으로 함수를
 
 2.5-1 < useFadeIn >
 
-=======
-============================================================================
->>>>>>> 63bf3bf57f184623838dc3364d73a7e55ab4eb46
+기본적으로 하나의 element를 가지는데, 자동으로 서서히 나타나게 만들거임. 지연시키거나 뭐든 할 수 있음.
+
+animation을 우리 hooks에 포함시키는 방법을 알아보는것이다. hooks와 animation을 섞는거임.
+
+const useFadeIn = (duration = 1, delay = 0) => {
+  if (typeof duration !== "number" || typeof delay !== "number") {
+    return;
+  }
+
+  const element = useRef();
+
+  useEffect(() => {
+    if (element.current) {
+      const { current } = element;
+      current.style.transition = `opacity ${duration}s ease-in-out ${delay}s`;
+      current.style.opacity = 1;
+    }
+  }, []);
+  return { ref: element, style: { opacity: 0 } };
+};
+
+function App() {
+  const fadeInH1 = useFadeIn(1, 2);
+  const fadeInP = useFadeIn(5, 10);
+
+  return (
+    <div>
+      <h1 {...fadeInH1}>Hello</h1>
+      <p {...fadeInP}> blabla blablalba </p>
+    </div>
+  );
+}
+
+h1, p 태그 2개가 애니메이션이 적용될 내용들임.
+
+... 문법은 spread 문법임. fadeInH1과 fadeInP에 사용됐는데 이건 이것들이 가진 모든것을 풀어준다는 거임.
+
+useFadeIn이 return하는 것이 해당 변수로 들어가게되고, return 되는것은 ref : element, style: {opacity: 0} 임.
+
+element.current로 접근가능한것은 위에 선언된 const element = useRef();로 인해 가능.
+
+useFadeIn함수, App에 선언된 const fadeInH1같은 변수, App이 스크린을 통해 리턴할 태그(h1, p)등에 ref로 접근했기때문에
+
+상호작용이됨. 그외 코드는 current로 애니메이션으로 접근한것.
+
+2.5-2 < useNetwork >
+
+useNetwork는 navigator가 online 또는 offline이 되는걸 막아주는거임.
+
+useNetwork가 할일은 function을 부르는거임.
+
+const useNetwork = onChange => {
+  const [status, setStatus] = useState(navigator.onLine);
+
+  const handleChange = () => {
+    if (typeof onChange === "function") {
+      onChange(navigator.onLine);
+    }
+    setStatus(navigator.onLine);
+  };
+
+  useEffect(() => {
+    window.addEventListener("online", handleChange);
+    window.addEventListener("offline", handleChange);
+
+    return () => {
+      window.removeEventListener("online", handleChange);
+      window.removeEventListener("offline", handleChange);
+    };
+  }, []);
+
+  return status;
+};
+
+function App() {
+  const handleNetworkChange = online => {
+    console.log(online ? "온라인" : "오프라인");
+  };
+  const onLine = useNetwork(handleNetworkChange);
+
+  return (
+    <div>
+      <h1>{onLine ? "online" : "offline"}</h1>
+    </div>
+  );
+}
+
+navigator.onLine 으로 나의 네트워크상태를 true, false로 확인할 수 있음.
+
+useState로 기본값을 navigator.onLine으로 줌. 인터넷에 연결되어있을거니 true임. status는 true로 초기화됨.
+
+handleChange에 의해 useNetwork가 인자로 받은함수에 다시 navigator.onLine 값을 주고, setStatus로 navigator.onLine을 갱신해줌.
+
+useEffect는 업데이트 될 때 window에 이벤트를 추가해줄거고 (online,offline이 발생할 때)
+
+이벤트가 발생이되면 handleChange로 감. 
+
+return으로 remove해줌 (unmount). 계속 업데이트하지 않을거기 때문에 dependency를 []로.
+
+App에선 onLine으로 변수선언하고 거기에 useNetwork에서 return받은 값을 넣어줌. 인자로 들어갈 함수는
+
+handleNetworkChange가 될거고. 이함수는 또 내부에서 인자를 받아 실행됨.
